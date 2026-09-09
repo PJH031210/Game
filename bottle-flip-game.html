@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
+<title>물병 던지기 챌린지</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Inter:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --sky-top: #6FB9E8;
+    --sky-bottom: #FFD9A0;
+    --sun: #FFEFC2;
+    --skyline: #4A79A6;
+    --wood: #8B5A2B;
+    --wood-light: #A9723F;
+    --wood-dark: #6E4420;
+    --bottle-body: #BFE7F2;
+    --bottle-body-dark: #8FCBDE;
+    --water: #2E9BD6;
+    --cap: #FF5A36;
+    --ink: #1B2A41;
+    --paper: #FFF7EC;
+    --accent: #FF5A36;
+    --accent-dark: #D6431F;
+    --success: #33B86C;
+    --fail: #E24B3C;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; min-height: 100%; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    color: var(--ink);
+    background: linear-gradient(180deg, #2B3A55 0%, #16202F 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 22px;
+  }
+
+  .stage {
+    width: 100%;
+    max-width: 420px;
+    text-align: center;
+  }
+
+  .title {
+    font-family: 'Fredoka', sans-serif;
+    font-weight: 700;
+    font-size: clamp(26px, 7vw, 34px);
+    margin: 0 0 4px;
+    color: var(--paper);
+    letter-spacing: 0.3px;
+  }
+
+  .subtitle {
+    font-size: 13.5px;
+    font-weight: 500;
+    color: #B9C6DA;
+    margin: 0 0 18px;
+  }
+
+  .scoreboard {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+  }
+
+  .score-chip {
+    background: rgba(255,255,255,0.06);
+    border: 2px solid rgba(255,255,255,0.1);
+    border-radius: 14px;
+    padding: 8px 16px;
+    min-width: 84px;
+  }
+
+  .score-chip .label {
+    display: block;
+    font-size: 11px;
+    font-weight: 700;
+    color: #9FB0C7;
+    margin-bottom: 2px;
+  }
+
+  .score-chip .value {
+    font-family: 'Fredoka', sans-serif;
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--accent);
+  }
+
+  .canvas-wrap {
+    position: relative;
+    border-radius: 22px;
+    overflow: hidden;
+    box-shadow: 0 16px 34px rgba(0,0,0,0.35);
+    touch-action: none;
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  canvas {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  .status-line {
+    margin-top: 16px;
+    min-height: 26px;
+    font-family: 'Fredoka', sans-serif;
+    font-weight: 600;
+    font-size: 17px;
+    color: var(--paper);
+  }
+  .status-line.success-text { color: var(--success); }
+  .status-line.fail-text { color: var(--fail); }
+
+  .actions { margin-top: 10px; }
+
+  .btn {
+    font-family: 'Fredoka', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--ink);
+    background: var(--accent);
+    border: none;
+    border-radius: 999px;
+    padding: 10px 26px;
+    cursor: pointer;
+    box-shadow: 0 4px 0 var(--accent-dark);
+    transition: transform 0.1s ease;
+  }
+  .btn:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--accent-dark); }
+
+  .hint {
+    margin-top: 14px;
+    font-size: 12px;
+    color: #8FA0B8;
+  }
+
+  @media (max-width: 360px) {
+    .score-chip { min-width: 70px; padding: 7px 10px; }
+    .score-chip .value { font-size: 19px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="stage">
+  <h1 class="title">물병 던지기 챌린지</h1>
+  <p class="subtitle">화면을 누르고 있으면 힘이 차오릅니다. 완벽한 타이밍에 손을 떼세요!</p>
+
+  <div class="scoreboard">
+    <div class="score-chip">
+      <span class="label">점수</span>
+      <span class="value" id="score">0</span>
+    </div>
+    <div class="score-chip">
+      <span class="label">연속 성공</span>
+      <span class="value" id="streak">0</span>
+    </div>
+    <div class="score-chip">
+      <span class="label">최고 연속</span>
+      <span class="value" id="bestStreak">0</span>
+    </div>
+  </div>
+
+  <div class="canvas-wrap" id="canvasWrap">
+    <canvas id="game" width="380" height="520"></canvas>
+  </div>
+
+  <p class="status-line" id="statusLine">눌러서 던질 준비를 하세요</p>
+
+  <div class="actions">
+    <button class="btn" id="resetBtn">기록 초기화</button>
+  </div>
+
+  <p class="hint">병이 정확히 세워져서 착지하면 성공! 회전이 어중간하면 넘어져요.</p>
+</div>
+
+<script>
+(function () {
+  const canvas = document.getElementById('game');
+  const ctx = canvas.getContext('2d');
+  const wrap = document.getElementById('canvasWrap');
+  const scoreEl = document.getElementById('score');
+  const streakEl = document.getElementById('streak');
+  const bestStreakEl = document.getElementById('bestStreak');
+  const statusLine = document.getElementById('statusLine');
+  const resetBtn = document.getElementById('resetBtn');
+
+  const W = canvas.width;
+  const H = canvas.height;
+  const TABLE_Y = H - 92;       // 테이블 표면 y좌표
+  const PAD_X = W / 2;          // 병이 놓이는 x좌표(고정)
+  const BOTTLE_W = 34;
+  const BOTTLE_H = 92;
+
+  // 물리 상수
+  const G = 0.62;               // 중력 (px/frame^2)
+  const VY_BASE = 9;
+  const VY_RANGE = 8;           // vy0 = VY_BASE + VY_RANGE * power
+  const SPIN_RATE = 20;         // deg/frame at power = 1 (omega = SPIN_RATE * power)
+
+  let score = 0;
+  let streak = 0;
+  let bestStreak = 0;
+
+  let state = 'idle';           // idle | charging | flying | result
+  let chargeStart = 0;
+  let power = 0;
+  let bottleY = TABLE_Y;
+  let vy = 0;
+  let rotation = 0;             // degrees
+  let omega = 0;
+  let resultRotation = 0;
+  let resultTimer = 0;
+  let resultKind = '';          // 'perfect' | 'success' | 'fail'
+
+  function updateScoreboard() {
+    scoreEl.textContent = score;
+    streakEl.textContent = streak;
+    bestStreakEl.textContent = bestStreak;
+  }
+
+  function setStatus(text, cls) {
+    statusLine.textContent = text;
+    statusLine.classList.remove('success-text', 'fail-text');
+    if (cls) statusLine.classList.add(cls);
+  }
+
+  // ---------- 입력 처리 ----------
+  function pointerDown(e) {
+    e.preventDefault();
+    if (state !== 'idle') return;
+    state = 'charging';
+    chargeStart = performance.now();
+    setStatus('힘을 모으는 중... 손을 떼서 던지세요!');
+  }
+
+  function pointerUp(e) {
+    e.preventDefault();
+    if (state !== 'charging') return;
+    launch();
+  }
+
+  wrap.addEventListener('pointerdown', pointerDown);
+  window.addEventListener('pointerup', pointerUp);
+  wrap.addEventListener('contextmenu', e => e.preventDefault());
+
+  function currentChargePower() {
+    const elapsed = performance.now() - chargeStart;
+    // 0~1~0 을 오가는 사인 파형 (주기 약 1100ms)
+    const period = 1100;
+    const t = (elapsed % period) / period;
+    return (Math.sin(t * Math.PI * 2 - Math.PI / 2) + 1) / 2; // 0..1
+  }
+
+  function launch() {
+    power = currentChargePower();
+    vy = -(VY_BASE + VY_RANGE * power);
+    omega = SPIN_RATE * power * (Math.random() < 0.5 ? 1 : 1); // 항상 정방향 회전
+    rotation = 0;
+    bottleY = TABLE_Y;
+    state = 'flying';
+    setStatus('날아가는 중!');
+  }
+
+  function evaluateLanding() {
+    const norm = ((rotation % 360) + 360) % 360;
+    const diff = Math.min(norm, 360 - norm);
+
+    if (diff <= 12) {
+      resultKind = 'perfect';
+      resultRotation = Math.round(rotation / 360) * 360;
+      score += 3;
+      streak += 1;
+    } else if (diff <= 32) {
+      resultKind = 'success';
+      resultRotation = Math.round(rotation / 360) * 360;
+      score += 1;
+      streak += 1;
+    } else {
+      resultKind = 'fail';
+      resultRotation = norm < 180 ? 90 : -90;
+      streak = 0;
+    }
+
+    if (streak > bestStreak) bestStreak = streak;
+    updateScoreboard();
+
+    if (resultKind === 'perfect') setStatus('완벽해요! PERFECT +3', 'success-text');
+    else if (resultKind === 'success') setStatus('성공! +1', 'success-text');
+    else setStatus('아쉬워요, 넘어졌어요', 'fail-text');
+
+    state = 'result';
+    resultTimer = performance.now();
+  }
+
+  function resetAfterResult() {
+    state = 'idle';
+    rotation = resultRotation;
+    bottleY = TABLE_Y;
+    setStatus('눌러서 던질 준비를 하세요');
+  }
+
+  resetBtn.addEventListener('click', () => {
+    score = 0;
+    streak = 0;
+    bestStreak = 0;
+    updateScoreboard();
+  });
+
+  // ---------- 그리기 ----------
+  function drawBackground() {
+    const g = ctx.createLinearGradient(0, 0, 0, TABLE_Y);
+    g.addColorStop(0, '#6FB9E8');
+    g.addColorStop(1, '#FFD9A0');
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, W, TABLE_Y + 4);
+
+    // 태양
+    ctx.beginPath();
+    ctx.arc(W - 70, 78, 34, 0, Math.PI * 2);
+    ctx.fillStyle = '#FFEFC2';
+    ctx.fill();
+
+    // 스카이라인
+    ctx.fillStyle = 'rgba(74,121,166,0.55)';
+    const buildings = [
+      [0, 210, 46, TABLE_Y - 210],
+      [50, 250, 34, TABLE_Y - 250],
+      [88, 190, 40, TABLE_Y - 190],
+      [270, 230, 38, TABLE_Y - 230],
+      [312, 260, 32, TABLE_Y - 260],
+      [346, 200, 34, TABLE_Y - 200],
+    ];
+    buildings.forEach(b => ctx.fillRect(b[0], b[1], b[2], b[3]));
+
+    // 테이블(나무)
+    const wg = ctx.createLinearGradient(0, TABLE_Y, 0, H);
+    wg.addColorStop(0, '#A9723F');
+    wg.addColorStop(1, '#6E4420');
+    ctx.fillStyle = wg;
+    ctx.fillRect(0, TABLE_Y, W, H - TABLE_Y);
+
+    // 착지 목표 구역 표시
+    ctx.fillStyle = 'rgba(255,255,255,0.18)';
+    ctx.fillRect(PAD_X - 46, TABLE_Y, 92, 6);
+  }
+
+  function drawChargeBar() {
+    if (state !== 'charging') return;
+    const p = currentChargePower();
+    const barW = 220, barH = 16;
+    const x = (W - barW) / 2, y = 34;
+
+    ctx.fillStyle = 'rgba(255,255,255,0.25)';
+    roundRect(x, y, barW, barH, 8);
+    ctx.fill();
+
+    const fillW = barW * p;
+    const hue = 120 - p * 120; // green -> red
+    ctx.fillStyle = 'hsl(' + hue + ', 85%, 55%)';
+    roundRect(x, y, fillW, barH, 8);
+    ctx.fill();
+
+    ctx.strokeStyle = 'rgba(255,255,255,0.6)';
+    ctx.lineWidth = 2;
+    roundRect(x, y, barW, barH, 8);
+    ctx.stroke();
+  }
+
+  function roundRect(x, y, w, h, r) {
+    if (w < 0) w = 0;
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.arcTo(x + w, y, x + w, y + h, r);
+    ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r);
+    ctx.arcTo(x, y, x + w, y, r);
+    ctx.closePath();
+  }
+
+  function drawBottle(cx, cy, rotDeg) {
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate(rotDeg * Math.PI / 180);
+
+    const bw = BOTTLE_W, bh = BOTTLE_H;
+
+    // 몸통
+    ctx.fillStyle = '#8FCBDE';
+    roundRect(-bw / 2, -bh / 2, bw, bh, 10);
+    ctx.fill();
+    ctx.fillStyle = '#BFE7F2';
+    roundRect(-bw / 2 + 3, -bh / 2 + 3, bw - 6, bh - 6, 8);
+    ctx.fill();
+
+    // 물
+    ctx.fillStyle = '#2E9BD6';
+    const waterH = bh * 0.42;
+    roundRect(-bw / 2 + 3, bh / 2 - waterH - 3, bw - 6, waterH, 6);
+    ctx.fill();
+
+    // 목
+    ctx.fillStyle = '#BFE7F2';
+    ctx.fillRect(-bw / 4, -bh / 2 - 14, bw / 2, 14);
+
+    // 뚜껑
+    ctx.fillStyle = '#FF5A36';
+    roundRect(-bw / 4 - 2, -bh / 2 - 22, bw / 2 + 4, 10, 3);
+    ctx.fill();
+
+    ctx.restore();
+  }
+
+  // ---------- 메인 루프 ----------
+  let lastTime = performance.now();
+
+  function frame(now) {
+    const dt = Math.min((now - lastTime) / 16.6667, 3); // 정규화된 프레임 단위
+    lastTime = now;
+
+    if (state === 'flying') {
+      bottleY += vy * dt;
+      vy += G * dt;
+      rotation += omega * dt;
+      if (bottleY >= TABLE_Y && vy > 0) {
+        bottleY = TABLE_Y;
+        evaluateLanding();
+      }
+    } else if (state === 'result') {
+      if (now - resultTimer > 950) {
+        resetAfterResult();
+      }
+    }
+
+    ctx.clearRect(0, 0, W, H);
+    drawBackground();
+    drawChargeBar();
+
+    const cy = bottleY - BOTTLE_H / 2 - 4;
+    const rot = state === 'result' ? resultRotation : rotation;
+    drawBottle(PAD_X, cy, rot);
+
+    requestAnimationFrame(frame);
+  }
+
+  updateScoreboard();
+  requestAnimationFrame(frame);
+})();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
+<title>총알 회피 챌린지</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;800&family=Inter:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-deep: #05060B;
+    --bg-mid: #0E1220;
+    --panel: #12172A;
+    --panel-light: #1C2340;
+    --player: #4CE0D2;
+    --player-glow: rgba(76,224,210,0.55);
+    --bullet: #FF3864;
+    --bullet-glow: rgba(255,56,100,0.55);
+    --accent: #7C5CFF;
+    --accent-dark: #5A3ED6;
+    --paper: #EAF0FF;
+    --dim: #7C88AE;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; min-height: 100%; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    color: var(--paper);
+    background: radial-gradient(circle at 30% 0%, #16213A, var(--bg-deep) 65%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 22px;
+  }
+
+  .stage { width: 100%; max-width: 420px; text-align: center; }
+
+  .title {
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 800;
+    font-size: clamp(22px, 6.5vw, 30px);
+    margin: 0 0 4px;
+    color: var(--paper);
+    letter-spacing: 0.5px;
+    text-shadow: 0 0 18px rgba(124,92,255,0.5);
+  }
+
+  .subtitle {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--dim);
+    margin: 0 0 16px;
+  }
+
+  .scoreboard {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+  }
+
+  .score-chip {
+    background: rgba(124,92,255,0.08);
+    border: 2px solid rgba(124,92,255,0.25);
+    border-radius: 14px;
+    padding: 8px 16px;
+    min-width: 100px;
+  }
+
+  .score-chip .label {
+    display: block;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--dim);
+    margin-bottom: 2px;
+  }
+
+  .score-chip .value {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 21px;
+    font-weight: 700;
+    color: var(--accent);
+  }
+
+  .canvas-wrap {
+    position: relative;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 16px 34px rgba(0,0,0,0.5), 0 0 0 2px rgba(124,92,255,0.2);
+  }
+
+  canvas {
+    display: block;
+    width: 100%;
+    height: auto;
+    background: var(--bg-mid);
+  }
+
+  .overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(5,6,11,0.86);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    padding: 24px;
+    text-align: center;
+    backdrop-filter: blur(2px);
+  }
+  .overlay[hidden] { display: none; }
+
+  .overlay .ov-title {
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 800;
+    font-size: 24px;
+    color: var(--paper);
+  }
+
+  .overlay .ov-desc {
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--dim);
+    max-width: 280px;
+    line-height: 1.5;
+  }
+
+  .keycap-row {
+    display: grid;
+    grid-template-columns: repeat(3, 34px);
+    grid-template-rows: repeat(2, 34px);
+    gap: 4px;
+    justify-content: center;
+    margin: 2px 0 4px;
+  }
+  .keycap {
+    background: var(--panel-light);
+    border: 2px solid rgba(255,255,255,0.14);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    color: var(--paper);
+  }
+  .keycap.up { grid-column: 2; grid-row: 1; }
+  .keycap.left { grid-column: 1; grid-row: 2; }
+  .keycap.down { grid-column: 2; grid-row: 2; }
+  .keycap.right { grid-column: 3; grid-row: 2; }
+
+  .ov-btn {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--bg-deep);
+    background: var(--accent);
+    border: none;
+    border-radius: 999px;
+    padding: 12px 30px;
+    cursor: pointer;
+    box-shadow: 0 4px 0 var(--accent-dark);
+    transition: transform 0.1s ease, box-shadow 0.1s ease;
+  }
+  .ov-btn:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--accent-dark); }
+
+  .result-scores {
+    display: flex;
+    gap: 14px;
+    margin: 2px 0 4px;
+  }
+  .result-card {
+    background: var(--panel-light);
+    border: 2px solid rgba(255,255,255,0.1);
+    border-radius: 14px;
+    padding: 10px 18px;
+    min-width: 100px;
+  }
+  .result-card.record { box-shadow: 0 0 0 3px var(--player); }
+  .result-card .rc-label { font-size: 11px; font-weight: 700; color: var(--dim); }
+  .result-card .rc-value {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--player);
+    margin-top: 2px;
+  }
+
+  .hint {
+    margin-top: 14px;
+    font-size: 12px;
+    color: var(--dim);
+  }
+
+  @media (max-width: 360px) {
+    .score-chip { min-width: 84px; padding: 7px 10px; }
+    .score-chip .value { font-size: 18px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="stage">
+  <h1 class="title">총알 회피 챌린지</h1>
+  <p class="subtitle">방향키로 움직여서 날아오는 총알을 피하세요!</p>
+
+  <div class="scoreboard">
+    <div class="score-chip">
+      <span class="label">생존 시간</span>
+      <span class="value" id="timeValue">0.0초</span>
+    </div>
+    <div class="score-chip">
+      <span class="label">최고 기록</span>
+      <span class="value" id="bestValue">0.0초</span>
+    </div>
+  </div>
+
+  <div class="canvas-wrap" id="canvasWrap">
+    <canvas id="game" width="380" height="520"></canvas>
+
+    <div class="overlay" id="readyOverlay">
+      <div class="ov-title">준비되셨나요?</div>
+      <div class="keycap-row">
+        <div class="keycap up">▲</div>
+        <div class="keycap left">◀</div>
+        <div class="keycap down">▼</div>
+        <div class="keycap right">▶</div>
+      </div>
+      <div class="ov-desc">방향키(← ↑ → ↓)로 캐릭터를 움직여 총알을 피하세요. 시간이 지날수록 총알이 많아지고 빨라져요.</div>
+      <button class="ov-btn" id="startBtn">게임 시작</button>
+    </div>
+
+    <div class="overlay" id="overOverlay" hidden>
+      <div class="ov-title">GAME OVER</div>
+      <div class="result-scores">
+        <div class="result-card" id="scoreCard">
+          <div class="rc-label">생존 시간</div>
+          <div class="rc-value" id="scoreFinal">0.0초</div>
+        </div>
+        <div class="result-card" id="bestCard">
+          <div class="rc-label">최고 기록</div>
+          <div class="rc-value" id="bestFinal">0.0초</div>
+        </div>
+      </div>
+      <button class="ov-btn" id="retryBtn">다시 도전</button>
+    </div>
+  </div>
+
+  <p class="hint">키보드가 있는 기기에서 플레이하세요.</p>
+</div>
+
+<script>
+(function () {
+  const canvas = document.getElementById('game');
+  const ctx = canvas.getContext('2d');
+  const readyOverlay = document.getElementById('readyOverlay');
+  const overOverlay = document.getElementById('overOverlay');
+  const startBtn = document.getElementById('startBtn');
+  const retryBtn = document.getElementById('retryBtn');
+  const timeValue = document.getElementById('timeValue');
+  const bestValue = document.getElementById('bestValue');
+  const scoreFinal = document.getElementById('scoreFinal');
+  const bestFinal = document.getElementById('bestFinal');
+  const scoreCard = document.getElementById('scoreCard');
+
+  const W = canvas.width;
+  const H = canvas.height;
+
+  const PLAYER_R = 9;
+  const PLAYER_SPEED = 3.4; // px/frame
+
+  let state = 'ready'; // ready | playing | over
+  let player = { x: W / 2, y: H / 2 };
+  let bullets = [];
+  let keys = {};
+  let startTime = 0;
+  let elapsed = 0;
+  let best = 0;
+  let spawnTimer = 0;
+  let stars = [];
+
+  for (let i = 0; i < 70; i++) {
+    stars.push({
+      x: Math.random() * W,
+      y: Math.random() * H,
+      r: Math.random() * 1.4 + 0.3,
+      a: Math.random() * 0.6 + 0.25
+    });
+  }
+
+  // ---------- 입력 ----------
+  window.addEventListener('keydown', (e) => {
+    if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
+      e.preventDefault();
+      keys[e.key] = true;
+    }
+  });
+  window.addEventListener('keyup', (e) => {
+    if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
+      keys[e.key] = false;
+    }
+  });
+
+  startBtn.addEventListener('click', startGame);
+  retryBtn.addEventListener('click', startGame);
+
+  function startGame() {
+    player.x = W / 2;
+    player.y = H * 0.72;
+    bullets = [];
+    keys = {};
+    spawnTimer = 0;
+    startTime = performance.now();
+    elapsed = 0;
+    state = 'playing';
+    readyOverlay.hidden = true;
+    overOverlay.hidden = true;
+    canvas.focus();
+  }
+
+  function spawnInterval(sec) {
+    return Math.max(220, 850 - sec * 16);
+  }
+
+  function bulletSpeed(sec) {
+    return 2.4 + Math.min(3.2, sec * 0.055);
+  }
+
+  function spawnBullet(sec) {
+    const edge = Math.floor(Math.random() * 4); // 0 top,1 right,2 bottom,3 left
+    let x, y;
+    if (edge === 0) { x = Math.random() * W; y = -12; }
+    else if (edge === 1) { x = W + 12; y = Math.random() * H; }
+    else if (edge === 2) { x = Math.random() * W; y = H + 12; }
+    else { x = -12; y = Math.random() * H; }
+
+    // 화면 안쪽의 랜덤한 지점을 향하도록 방향 설정
+    const targetX = W * (0.2 + Math.random() * 0.6);
+    const targetY = H * (0.2 + Math.random() * 0.6);
+    const dx = targetX - x, dy = targetY - y;
+    const dist = Math.hypot(dx, dy) || 1;
+    const spd = bulletSpeed(sec);
+
+    bullets.push({
+      x, y,
+      vx: (dx / dist) * spd,
+      vy: (dy / dist) * spd,
+      r: 6
+    });
+  }
+
+  function update(dt, sec) {
+    // 플레이어 이동
+    let mx = 0, my = 0;
+    if (keys['ArrowLeft']) mx -= 1;
+    if (keys['ArrowRight']) mx += 1;
+    if (keys['ArrowUp']) my -= 1;
+    if (keys['ArrowDown']) my += 1;
+    if (mx !== 0 || my !== 0) {
+      const len = Math.hypot(mx, my);
+      player.x += (mx / len) * PLAYER_SPEED * dt;
+      player.y += (my / len) * PLAYER_SPEED * dt;
+    }
+    player.x = Math.max(PLAYER_R, Math.min(W - PLAYER_R, player.x));
+    player.y = Math.max(PLAYER_R, Math.min(H - PLAYER_R, player.y));
+
+    // 총알 스폰
+    spawnTimer += dt * 16.6667;
+    if (spawnTimer >= spawnInterval(sec)) {
+      spawnTimer = 0;
+      spawnBullet(sec);
+    }
+
+    // 총알 이동 및 정리
+    bullets.forEach(b => { b.x += b.vx * dt; b.y += b.vy * dt; });
+    bullets = bullets.filter(b => b.x > -40 && b.x < W + 40 && b.y > -40 && b.y < H + 40);
+
+    // 충돌 판정
+    for (const b of bullets) {
+      const d = Math.hypot(b.x - player.x, b.y - player.y);
+      if (d < b.r + PLAYER_R - 2) {
+        triggerGameOver();
+        break;
+      }
+    }
+  }
+
+  function triggerGameOver() {
+    state = 'over';
+    if (elapsed > best) best = elapsed;
+    bestValue.textContent = best.toFixed(1) + '초';
+    scoreFinal.textContent = elapsed.toFixed(1) + '초';
+    bestFinal.textContent = best.toFixed(1) + '초';
+    scoreCard.classList.toggle('record', elapsed >= best);
+    overOverlay.hidden = false;
+  }
+
+  function drawBackground() {
+    ctx.fillStyle = '#0E1220';
+    ctx.fillRect(0, 0, W, H);
+    stars.forEach(s => {
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(234,240,255,' + s.a + ')';
+      ctx.fill();
+    });
+  }
+
+  function drawPlayer() {
+    ctx.save();
+    ctx.shadowColor = '#4CE0D2';
+    ctx.shadowBlur = 18;
+    ctx.beginPath();
+    ctx.arc(player.x, player.y, PLAYER_R, 0, Math.PI * 2);
+    ctx.fillStyle = '#4CE0D2';
+    ctx.fill();
+    ctx.restore();
+
+    ctx.beginPath();
+    ctx.arc(player.x, player.y, 3.4, 0, Math.PI * 2);
+    ctx.fillStyle = '#0E1220';
+    ctx.fill();
+  }
+
+  function drawBullets() {
+    bullets.forEach(b => {
+      ctx.save();
+      ctx.shadowColor = '#FF3864';
+      ctx.shadowBlur = 14;
+      ctx.beginPath();
+      ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
+      ctx.fillStyle = '#FF3864';
+      ctx.fill();
+      ctx.restore();
+    });
+  }
+
+  function drawHudTime() {
+    if (state !== 'playing') return;
+    timeValue.textContent = elapsed.toFixed(1) + '초';
+  }
+
+  let lastTime = performance.now();
+  function frame(now) {
+    const dt = Math.min((now - lastTime) / 16.6667, 3);
+    lastTime = now;
+
+    if (state === 'playing') {
+      elapsed = (now - startTime) / 1000;
+      update(dt, elapsed);
+      drawHudTime();
+    }
+
+    drawBackground();
+    drawBullets();
+    if (state !== 'ready') drawPlayer();
+
+    requestAnimationFrame(frame);
+  }
+
+  bestValue.textContent = '0.0초';
+  requestAnimationFrame(frame);
+})();
+</script>
+
+</body>
+</html>

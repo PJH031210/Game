@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>미니게임 아케이드</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600&display=swap');
+
+  :root{
+    --bg:#181A2E;
+    --bg-2:#20233D;
+    --gold:#FFC93C;
+    --coral:#FF5D73;
+    --teal:#00C2A8;
+    --cream:#F4EFEA;
+    --cream-dim:#B9B5C4;
+    --line: rgba(244,239,234,0.14);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(ellipse at 20% 0%, rgba(255,201,60,0.08), transparent 55%),
+      radial-gradient(ellipse at 85% 15%, rgba(255,93,115,0.08), transparent 50%),
+      var(--bg);
+    color:var(--cream);
+    font-family:'Inter', sans-serif;
+    min-height:100vh;
+  }
+  .wrap{
+    max-width:960px;
+    margin:0 auto;
+    padding:64px 24px 80px;
+  }
+
+  header{
+    text-align:center;
+    margin-bottom:56px;
+  }
+  .eyebrow{
+    font-size:13px;
+    letter-spacing:0.04em;
+    color:var(--gold);
+    margin:0 0 12px;
+    font-weight:500;
+  }
+  h1{
+    font-family:'Anton', sans-serif;
+    font-weight:400;
+    font-size:clamp(40px, 7vw, 72px);
+    line-height:0.95;
+    margin:0 0 16px;
+    letter-spacing:0.01em;
+    color:var(--cream);
+    text-shadow: 3px 3px 0 var(--coral);
+  }
+  header p{
+    color:var(--cream-dim);
+    font-size:16px;
+    margin:0 auto;
+    max-width:440px;
+    line-height:1.6;
+  }
+
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(260px, 1fr));
+    gap:20px;
+  }
+
+  .card{
+    position:relative;
+    display:block;
+    background:var(--bg-2);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:28px 24px 26px;
+    text-decoration:none;
+    color:inherit;
+    overflow:hidden;
+    transition: transform 0.18s ease, border-color 0.18s ease;
+  }
+  .card:hover{
+    transform:translateY(-4px);
+    border-color:var(--accent, var(--gold));
+  }
+  .card::before{
+    content:"";
+    position:absolute;
+    top:0; left:0; right:0;
+    height:4px;
+    background:var(--accent, var(--gold));
+  }
+  .ticket-no{
+    font-size:12px;
+    color:var(--cream-dim);
+    letter-spacing:0.06em;
+    margin-bottom:14px;
+    display:block;
+  }
+  .card h2{
+    font-family:'Anton', sans-serif;
+    font-weight:400;
+    font-size:26px;
+    margin:0 0 10px;
+    color:var(--cream);
+    line-height:1.05;
+  }
+  .card p{
+    font-size:14px;
+    color:var(--cream-dim);
+    margin:0 0 22px;
+    line-height:1.55;
+  }
+  .play{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    font-size:13px;
+    font-weight:600;
+    color:var(--accent, var(--gold));
+  }
+  .play svg{width:14px; height:14px;}
+
+  footer{
+    margin-top:64px;
+    text-align:center;
+    color:var(--cream-dim);
+    font-size:13px;
+  }
+
+  @media (max-width:520px){
+    .wrap{padding:48px 18px 60px;}
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <p class="eyebrow">미니게임 모음</p>
+      <h1>아케이드 부스</h1>
+      <p>가볍게 즐기는 6가지 미니게임. 카드를 눌러 바로 플레이하세요.</p>
+    </header>
+
+    <div class="grid">
+
+      <a class="card" style="--accent:#FF5D73" href="aim_trainer_game.html">
+        <span class="ticket-no">부스 01</span>
+        <h2>에임 트레이너</h2>
+        <p>빠르게 나타나는 타깃을 클릭해 반응속도와 정확도를 훈련하세요.</p>
+        <span class="play">플레이<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+      </a>
+
+      <a class="card" style="--accent:#00C2A8" href="bottle-flip-game.html">
+        <span class="ticket-no">부스 02</span>
+        <h2>물병 뒤집기</h2>
+        <p>타이밍에 맞춰 던지고 물병을 똑바로 세워보세요. 한 번에 성공할 수 있을까요.</p>
+        <span class="play">플레이<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+      </a>
+
+      <a class="card" style="--accent:#FFC93C" href="bullet-dodge-game.html">
+        <span class="ticket-no">부스 03</span>
+        <h2>총알 피하기</h2>
+        <p>사방에서 날아오는 총알을 요리조리 피하며 최대한 오래 버텨보세요.</p>
+        <span class="play">플레이<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+      </a>
+
+      <a class="card" style="--accent:#FF5D73" href="click-challenge-game.html">
+        <span class="ticket-no">부스 04</span>
+        <h2>클릭 챌린지</h2>
+        <p>제한 시간 안에 최대한 많이 클릭해서 자신의 기록에 도전하세요.</p>
+        <span class="play">플레이<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+      </a>
+
+      <a class="card" style="--accent:#00C2A8" href="crocodile-teeth-game.html">
+        <span class="ticket-no">부스 05</span>
+        <h2>악어 이빨 뽑기</h2>
+        <p>이빨을 하나씩 눌러보고, 무는 이빨을 피해 마지막까지 살아남으세요.</p>
+        <span class="play">플레이<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+      </a>
+
+      <a class="card" style="--accent:#FFC93C" href="pop-up-pirate-game.html">
+        <span class="ticket-no">부스 06</span>
+        <h2>뻥튀기 해적</h2>
+        <p>통 속 칼을 하나씩 눌러보고, 해적이 튀어 오르기 전에 손을 떼세요.</p>
+        <span class="play">플레이<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+      </a>
+
+    </div>
+
+    <footer>각 카드를 클릭하면 해당 게임 페이지로 이동합니다.</footer>
+  </div>
+</body>
+</html>

@@ -1,0 +1,200 @@
+<style>
+@keyframes popIn { from { transform: translate(-50%,-50%) scale(0.3); opacity:0; } to { transform: translate(-50%,-50%) scale(1); opacity:1; } }
+@keyframes floatUp { from { transform: translate(-50%,-50%) translateY(0); opacity:1; } to { transform: translate(-50%,-50%) translateY(-36px); opacity:0; } }
+#target { animation: popIn 0.15s ease-out; }
+.hitPop { position:absolute; font-size:15px; font-weight:500; pointer-events:none; animation: floatUp 0.5s ease-out forwards; }
+</style>
+<h2 class="sr-only">에임 연습 게임: 사격장 배경 위에 제한 시간 안에 무작위로 나타나는 표적을 마우스로 최대한 많이 클릭하는 반응속도 게임입니다.</h2>
+<div style="display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:10px;">
+  <div id="missPill" style="display:flex; align-items:center; gap:8px; padding:8px 14px; border-radius:999px; background:var(--surface-1); border:0.5px solid var(--border); white-space:nowrap;">
+    <i class="ti ti-x" style="font-size:15px;" aria-hidden="true"></i>
+    <span id="missText" style="font-size:14px; font-weight:500; color:var(--text-primary);">미스 0</span>
+  </div>
+  <div style="text-align:center;">
+    <div style="font-size:12px; color:var(--text-secondary);">점수</div>
+    <div id="scoreText" style="font-size:28px; font-weight:500; color:var(--text-primary); line-height:1.1;">0</div>
+  </div>
+  <div id="timePill" style="display:flex; align-items:center; gap:8px; padding:8px 14px; border-radius:999px; background:var(--surface-1); border:0.5px solid var(--border); white-space:nowrap;">
+    <i class="ti ti-clock" style="font-size:15px;" aria-hidden="true"></i>
+    <span id="timeText" style="font-size:14px; font-weight:500; color:var(--text-primary);">20초</span>
+  </div>
+</div>
+<div style="width:100%; height:4px; border-radius:2px; background:var(--surface-1); margin-bottom:14px; overflow:hidden;">
+  <div id="progressBar" style="height:100%; width:100%; background:var(--fill-accent); transition:width 1s linear, background 0.3s;"></div>
+</div>
+<div id="area" style="position:relative; width:100%; height:320px; border:0.5px solid var(--border); border-radius:var(--radius); overflow:hidden; cursor:crosshair;">
+  <svg viewBox="0 0 800 320" preserveAspectRatio="xMidYMid slice" style="position:absolute; inset:0; width:100%; height:100%; pointer-events:none;">
+    <rect x="0" y="0" width="800" height="190" fill="#B7CFE0"></rect>
+    <rect x="0" y="190" width="800" height="130" fill="#C4AE81"></rect>
+    <rect x="0" y="0" width="800" height="10" fill="#3B3B3B"></rect>
+    <rect x="30" y="0" width="20" height="10" fill="#E8C24A"></rect>
+    <rect x="90" y="0" width="20" height="10" fill="#E8C24A"></rect>
+    <rect x="150" y="0" width="20" height="10" fill="#E8C24A"></rect>
+    <rect x="210" y="0" width="20" height="10" fill="#E8C24A"></rect>
+    <rect x="270" y="0" width="20" height="10" fill="#E8C24A"></rect>
+    <rect x="330" y="0" width="20" height="10" fill="#E8C24A"></rect>
+    <rect x="390" y="0" width="20" height="10" fill="#E8C24A"></rect>
+    <rect x="450" y="0" width="20" height="10" fill="#E8C24A"></rect>
+    <rect x="510" y="0" width="20" height="10" fill="#E8C24A"></rect>
+    <rect x="570" y="0" width="20" height="10" fill="#E8C24A"></rect>
+    <rect x="630" y="0" width="20" height="10" fill="#E8C24A"></rect>
+    <rect x="690" y="0" width="20" height="10" fill="#E8C24A"></rect>
+    <rect x="750" y="0" width="20" height="10" fill="#E8C24A"></rect>
+    <line x1="0" y1="320" x2="400" y2="185" stroke="#AE9868" stroke-width="2"></line>
+    <line x1="200" y1="320" x2="400" y2="185" stroke="#AE9868" stroke-width="2"></line>
+    <line x1="400" y1="320" x2="400" y2="185" stroke="#AE9868" stroke-width="2"></line>
+    <line x1="600" y1="320" x2="400" y2="185" stroke="#AE9868" stroke-width="2"></line>
+    <line x1="800" y1="320" x2="400" y2="185" stroke="#AE9868" stroke-width="2"></line>
+    <line x1="0" y1="190" x2="800" y2="190" stroke="#8E9CA8" stroke-width="2"></line>
+    <rect x="8" y="60" width="14" height="130" fill="#6B4A2E"></rect>
+    <rect x="778" y="60" width="14" height="130" fill="#6B4A2E"></rect>
+    <g transform="translate(280,190) scale(0.45)">
+      <path d="M -16,34 L -16,-10 Q -16,-26 0,-30 Q 16,-26 16,-10 L 16,34 Z" fill="#5C4A38"></path>
+      <circle cx="0" cy="-34" r="8" fill="#5C4A38"></circle>
+    </g>
+    <g transform="translate(400,190) scale(0.6)">
+      <path d="M -16,34 L -16,-10 Q -16,-26 0,-30 Q 16,-26 16,-10 L 16,34 Z" fill="#5C4A38"></path>
+      <circle cx="0" cy="-34" r="8" fill="#5C4A38"></circle>
+    </g>
+    <g transform="translate(520,190) scale(0.45)">
+      <path d="M -16,34 L -16,-10 Q -16,-26 0,-30 Q 16,-26 16,-10 L 16,34 Z" fill="#5C4A38"></path>
+      <circle cx="0" cy="-34" r="8" fill="#5C4A38"></circle>
+    </g>
+  </svg>
+  <div id="target" style="position:absolute; width:64px; height:64px; display:none; align-items:center; justify-content:center; border-radius:50%; background:#D85A30; transform:translate(-50%,-50%);">
+    <div style="width:40px; height:40px; border-radius:50%; background:#f7f4ec; display:flex; align-items:center; justify-content:center;">
+      <div style="width:16px; height:16px; border-radius:50%; background:#D85A30;"></div>
+    </div>
+  </div>
+  <div id="overlay" style="position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; background:var(--surface-1);">
+    <i id="overlayIcon" class="ti ti-target" style="font-size:32px; color:var(--text-accent);" aria-hidden="true"></i>
+    <div id="overlayTitle" style="font-size:18px; font-weight:500; color:var(--text-primary);">준비되면 시작하세요</div>
+    <div id="overlaySub" style="font-size:14px; color:var(--text-secondary);">20초 동안 표적을 최대한 많이 클릭하세요</div>
+    <button id="startBtn" style="margin-top:6px;"><i class="ti ti-player-play" style="font-size:16px; vertical-align:-2px; margin-right:6px;" aria-hidden="true"></i>시작</button>
+  </div>
+</div>
+
+<script>
+(function(){
+  var DURATION = 20;
+  var AREA_MARGIN = 8;
+  var TARGET_HALF = 5;
+
+  var area = document.getElementById('area');
+  var target = document.getElementById('target');
+  var overlay = document.getElementById('overlay');
+  var overlayIcon = document.getElementById('overlayIcon');
+  var overlayTitle = document.getElementById('overlayTitle');
+  var overlaySub = document.getElementById('overlaySub');
+  var startBtn = document.getElementById('startBtn');
+  var timePill = document.getElementById('timePill');
+  var timeText = document.getElementById('timeText');
+  var scoreText = document.getElementById('scoreText');
+  var missPill = document.getElementById('missPill');
+  var missText = document.getElementById('missText');
+  var progressBar = document.getElementById('progressBar');
+
+  var running = false;
+  var score = 0;
+  var misses = 0;
+  var timeLeft = DURATION;
+  var timerId = null;
+
+  function randomPosition(){
+    var x = AREA_MARGIN + TARGET_HALF + Math.random() * (100 - 2 * (AREA_MARGIN + TARGET_HALF));
+    var y = AREA_MARGIN + TARGET_HALF + Math.random() * (100 - 2 * (AREA_MARGIN + TARGET_HALF));
+    return { x: x, y: y };
+  }
+
+  function spawnTarget(){
+    var pos = randomPosition();
+    target.style.left = pos.x + '%';
+    target.style.top = pos.y + '%';
+    target.style.display = 'none';
+    void target.offsetWidth;
+    target.style.display = 'flex';
+  }
+
+  function updateTimeText(){
+    timeText.textContent = timeLeft + '초';
+    var low = timeLeft <= 5;
+    timeText.style.color = low ? 'var(--text-danger)' : 'var(--text-primary)';
+    timePill.style.background = low ? 'var(--bg-danger)' : 'var(--surface-1)';
+    progressBar.style.width = Math.max(0, (timeLeft / DURATION) * 100) + '%';
+    progressBar.style.background = low ? 'var(--fill-danger)' : 'var(--fill-accent)';
+  }
+
+  function tick(){
+    timeLeft -= 1;
+    updateTimeText();
+    if (timeLeft <= 0){
+      endGame();
+    }
+  }
+
+  function startGame(){
+    score = 0;
+    misses = 0;
+    timeLeft = DURATION;
+    running = true;
+    scoreText.textContent = score;
+    missText.textContent = '미스 ' + misses;
+    missPill.style.background = 'var(--surface-1)';
+    missPill.style.color = 'var(--text-primary)';
+    updateTimeText();
+    overlay.style.display = 'none';
+    spawnTarget();
+    timerId = setInterval(tick, 1000);
+  }
+
+  function endGame(){
+    running = false;
+    clearInterval(timerId);
+    target.style.display = 'none';
+    var attempts = score + misses;
+    var accuracy = attempts > 0 ? Math.round((score / attempts) * 100) : 0;
+    overlayIcon.className = 'ti ti-trophy';
+    overlayTitle.textContent = '점수 ' + score + '점';
+    overlaySub.textContent = '정확도 ' + accuracy + '%';
+    startBtn.innerHTML = '<i class="ti ti-refresh" style="font-size:16px; vertical-align:-2px; margin-right:6px;" aria-hidden="true"></i>다시 시작';
+    overlay.style.display = 'flex';
+  }
+
+  function showPop(x, y, text, color){
+    var pop = document.createElement('div');
+    pop.className = 'hitPop';
+    pop.textContent = text;
+    pop.style.left = x + '%';
+    pop.style.top = y + '%';
+    pop.style.color = color;
+    area.appendChild(pop);
+    setTimeout(function(){ pop.remove(); }, 500);
+  }
+
+  target.addEventListener('click', function(e){
+    e.stopPropagation();
+    if (!running) return;
+    score += 1;
+    scoreText.textContent = score;
+    showPop(parseFloat(target.style.left), parseFloat(target.style.top), '+1', '#0F6E56');
+    spawnTarget();
+  });
+
+  area.addEventListener('click', function(e){
+    if (!running) return;
+    misses += 1;
+    missText.textContent = '미스 ' + misses;
+    missPill.style.background = 'var(--bg-danger)';
+    missPill.style.color = 'var(--text-danger)';
+    var rect = area.getBoundingClientRect();
+    var x = ((e.clientX - rect.left) / rect.width) * 100;
+    var y = ((e.clientY - rect.top) / rect.height) * 100;
+    showPop(x, y, 'miss', '#A32D2D');
+  });
+
+  startBtn.addEventListener('click', function(e){
+    e.stopPropagation();
+    startGame();
+  });
+})();
+</script>

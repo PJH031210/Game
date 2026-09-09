@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
+<title>악어 이빨 조심해!</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-deep: #0E3620;
+    --bg-mid: #185030;
+    --vine: #2B6B3F;
+    --croc-skin: #4C8A45;
+    --croc-skin-dark: #386736;
+    --croc-belly: #DCE7B8;
+    --gum: #B23A3A;
+    --gum-dark: #8C2A2A;
+    --mouth-inner: #5E1414;
+    --tooth: #FFF9EC;
+    --tooth-shadow: #E3D9BE;
+    --accent: #F2C230;
+    --accent-dark: #C9960E;
+    --danger: #E24B3C;
+    --ink: #12331D;
+    --paper: #F4EFDE;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    min-height: 100%;
+  }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    color: var(--paper);
+    background:
+      radial-gradient(circle at 15% 10%, rgba(255,255,255,0.05), transparent 40%),
+      radial-gradient(circle at 85% 90%, rgba(255,255,255,0.04), transparent 45%),
+      linear-gradient(160deg, var(--bg-mid) 0%, var(--bg-deep) 70%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    overflow-x: hidden;
+  }
+
+  .leaf {
+    position: fixed;
+    border-radius: 0 100% 0 100%;
+    background: var(--vine);
+    opacity: 0.35;
+    z-index: 0;
+  }
+  .leaf1 { width: 160px; height: 160px; top: -40px; left: -40px; transform: rotate(20deg); }
+  .leaf2 { width: 220px; height: 220px; bottom: -60px; right: -60px; transform: rotate(-15deg); }
+  .leaf3 { width: 90px; height: 90px; top: 60%; left: -20px; transform: rotate(60deg); opacity: 0.2;}
+
+  .stage {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 480px;
+    text-align: center;
+  }
+
+  .title {
+    font-family: 'Baloo 2', sans-serif;
+    font-weight: 800;
+    font-size: clamp(28px, 7vw, 38px);
+    margin: 0 0 6px;
+    color: var(--paper);
+    text-shadow: 0 3px 0 rgba(0,0,0,0.25);
+    letter-spacing: 0.5px;
+  }
+
+  .subtitle {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--croc-belly);
+    margin: 0 0 20px;
+    opacity: 0.85;
+  }
+
+  .scoreboard {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 22px;
+    flex-wrap: wrap;
+  }
+
+  .score-chip {
+    background: rgba(0,0,0,0.22);
+    border: 2px solid rgba(255,255,255,0.12);
+    border-radius: 14px;
+    padding: 8px 14px;
+    min-width: 78px;
+  }
+
+  .score-chip .label {
+    display: block;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--croc-belly);
+    opacity: 0.8;
+    margin-bottom: 2px;
+  }
+
+  .score-chip .value {
+    font-family: 'Baloo 2', sans-serif;
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--accent);
+  }
+
+  /* --- Crocodile head --- */
+  .stage-select {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+
+  .stage-btn {
+    font-family: 'Nunito', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    color: var(--paper);
+    background: rgba(0,0,0,0.2);
+    border: 2px solid rgba(255,255,255,0.14);
+    border-radius: 12px;
+    padding: 8px 14px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    transition: transform 0.1s ease, background 0.15s ease, border-color 0.15s ease;
+  }
+
+  .stage-btn span {
+    font-size: 11px;
+    font-weight: 600;
+    opacity: 0.75;
+  }
+
+  .stage-btn:hover { transform: translateY(-2px); }
+
+  .stage-btn.active {
+    background: var(--accent);
+    border-color: var(--accent-dark);
+    color: var(--ink);
+  }
+  .stage-btn.active span { opacity: 0.7; color: var(--ink); }
+
+  .croc-wrap {
+    position: relative;
+    perspective: 900px;
+  }
+
+  .croc {
+    position: relative;
+    background: var(--croc-skin);
+    border-radius: 40px 40px 46px 46px;
+    padding: 20px 16px 26px;
+    box-shadow:
+      0 18px 0 rgba(0,0,0,0.18),
+      inset 0 -8px 0 rgba(0,0,0,0.08);
+    border: 4px solid var(--croc-skin-dark);
+  }
+
+  .croc-bumps {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  .croc-bumps span {
+    width: 14px;
+    height: 14px;
+    background: var(--croc-skin-dark);
+    border-radius: 3px;
+    transform: rotate(45deg);
+  }
+
+  .eyes {
+    display: flex;
+    justify-content: center;
+    gap: 26px;
+    margin-bottom: -6px;
+    transition: transform 0.15s ease;
+  }
+
+  .eye {
+    width: 34px;
+    height: 34px;
+    background: var(--croc-belly);
+    border-radius: 50%;
+    border: 3px solid var(--croc-skin-dark);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .eye .pupil {
+    width: 8px;
+    height: 16px;
+    background: var(--ink);
+    border-radius: 40%;
+  }
+
+  .mouth {
+    position: relative;
+    background: var(--mouth-inner);
+    border-radius: 20px;
+    padding: 10px 8px;
+    margin-top: 10px;
+    overflow: hidden;
+  }
+
+  .jaw {
+    position: relative;
+    transform-origin: center top;
+    transition: transform 0.28s cubic-bezier(.36,.07,.19,.97);
+  }
+
+  .jaw-bottom {
+    transform-origin: center bottom;
+  }
+
+  .gum {
+    background: linear-gradient(180deg, var(--gum), var(--gum-dark));
+    border-radius: 16px;
+    padding: 10px 8px 0;
+    display: flex;
+    justify-content: space-between;
+    gap: 5px;
+  }
+
+  .jaw-bottom .gum {
+    border-radius: 0 0 16px 16px;
+    padding: 0 8px 10px;
+    align-items: flex-end;
+  }
+
+  .tooth-btn {
+    appearance: none;
+    -webkit-tap-highlight-color: transparent;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    flex: 1 1 0;
+    max-width: 42px;
+    min-width: 14px;
+    aspect-ratio: 3 / 4;
+    background: linear-gradient(180deg, var(--tooth), var(--tooth-shadow));
+    clip-path: polygon(50% 100%, 0% 0%, 100% 0%);
+    transition: transform 0.12s ease, opacity 0.2s ease, filter 0.2s ease;
+    filter: drop-shadow(0 2px 0 rgba(0,0,0,0.2));
+  }
+
+  .jaw-bottom .tooth-btn {
+    clip-path: polygon(50% 0%, 100% 100%, 0% 100%);
+  }
+
+  .tooth-btn:hover:not(:disabled) {
+    transform: translateY(-3px);
+  }
+
+  .tooth-btn:active:not(:disabled) {
+    transform: translateY(1px) scale(0.96);
+  }
+
+  .tooth-btn.pressed {
+    background: linear-gradient(180deg, #B9AE8E, #9C9276);
+    opacity: 0.55;
+    cursor: default;
+    transform: translateY(4px) scaleY(0.7);
+  }
+
+  .jaw-bottom .tooth-btn.pressed {
+    transform: translateY(-4px) scaleY(0.7);
+  }
+
+  .tooth-btn.trap-hit {
+    background: linear-gradient(180deg, var(--danger), #8f1c12) !important;
+    opacity: 1 !important;
+  }
+
+  .tooth-btn:disabled { pointer-events: none; }
+
+  /* bite animation */
+  .croc.biting .jaw-top { transform: translateY(4px) rotateX(0deg); }
+  .croc.biting .jaw-bottom { transform: translateY(-4px); }
+  .croc.biting .eyes { transform: scaleY(0.2); }
+
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20% { transform: translateX(-8px) rotate(-1.5deg); }
+    40% { transform: translateX(7px) rotate(1.5deg); }
+    60% { transform: translateX(-5px); }
+    80% { transform: translateX(4px); }
+  }
+  .croc-wrap.shake { animation: shake 0.4s ease; }
+
+  .clak {
+    position: absolute;
+    top: 40%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.4) rotate(-8deg);
+    font-family: 'Baloo 2', sans-serif;
+    font-size: 42px;
+    font-weight: 800;
+    color: var(--accent);
+    text-shadow: 3px 3px 0 var(--ink);
+    opacity: 0;
+    pointer-events: none;
+    z-index: 5;
+  }
+  .clak.show {
+    animation: pop 0.5s ease forwards;
+  }
+  @keyframes pop {
+    0% { opacity: 0; transform: translate(-50%,-50%) scale(0.2) rotate(-8deg); }
+    50% { opacity: 1; transform: translate(-50%,-50%) scale(1.15) rotate(-4deg); }
+    100% { opacity: 1; transform: translate(-50%,-50%) scale(1) rotate(-4deg); }
+  }
+
+  .status-line {
+    margin-top: 18px;
+    min-height: 22px;
+    font-weight: 700;
+    font-size: 14px;
+    color: var(--accent);
+  }
+  .status-line.danger-text { color: var(--danger); }
+
+  .actions {
+    margin-top: 14px;
+  }
+
+  .btn {
+    font-family: 'Baloo 2', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--ink);
+    background: var(--accent);
+    border: none;
+    border-radius: 999px;
+    padding: 11px 28px;
+    cursor: pointer;
+    box-shadow: 0 4px 0 var(--accent-dark);
+    transition: transform 0.1s ease, box-shadow 0.1s ease;
+  }
+  .btn:hover { filter: brightness(1.04); }
+  .btn:active {
+    transform: translateY(3px);
+    box-shadow: 0 1px 0 var(--accent-dark);
+  }
+
+  .hint {
+    margin-top: 16px;
+    font-size: 12.5px;
+    color: var(--croc-belly);
+    opacity: 0.75;
+  }
+
+  @media (max-width: 380px) {
+    .score-chip { min-width: 66px; padding: 7px 10px; }
+    .score-chip .value { font-size: 20px; }
+    .title { font-size: 26px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="leaf leaf1"></div>
+<div class="leaf leaf2"></div>
+<div class="leaf leaf3"></div>
+
+<div class="stage">
+  <h1 class="title">악어 이빨 조심해!</h1>
+  <p class="subtitle">이빨을 하나씩 눌러보세요. 함정 이빨을 물면 게임 오버!</p>
+
+  <div class="scoreboard">
+    <div class="score-chip">
+      <span class="label">스테이지</span>
+      <span class="value" id="stage">1 / 3</span>
+    </div>
+    <div class="score-chip">
+      <span class="label">점수</span>
+      <span class="value" id="score">0</span>
+    </div>
+    <div class="score-chip">
+      <span class="label">최고 점수</span>
+      <span class="value" id="best">0</span>
+    </div>
+  </div>
+
+  <div class="stage-select" id="stageSelect">
+    <button class="stage-btn" data-stage="0">1단계<span>10개</span></button>
+    <button class="stage-btn" data-stage="1">2단계<span>16개</span></button>
+    <button class="stage-btn" data-stage="2">3단계<span>22개</span></button>
+  </div>
+
+  <div class="croc-wrap" id="crocWrap">
+    <div class="clak" id="clak">CLAK!</div>
+    <div class="croc" id="croc">
+      <div class="croc-bumps">
+        <span></span><span></span><span></span><span></span><span></span>
+      </div>
+      <div class="eyes" id="eyes">
+        <div class="eye"><div class="pupil"></div></div>
+        <div class="eye"><div class="pupil"></div></div>
+      </div>
+      <div class="mouth">
+        <div class="jaw jaw-top">
+          <div class="gum" id="topGum"></div>
+        </div>
+        <div class="jaw jaw-bottom">
+          <div class="gum" id="bottomGum"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <p class="status-line" id="statusLine">이빨을 눌러 시작하세요</p>
+
+  <div class="actions">
+    <button class="btn" id="restartBtn">다시 시작</button>
+  </div>
+
+  <p class="hint">이빨이 줄어들수록 함정을 밟을 확률이 높아져요. 언제까지 버틸 수 있나요?</p>
+</div>
+
+<script>
+(function () {
+  const BASE_TOOTH_COUNT = 10;   // 스테이지 1 이빨 개수
+  const TEETH_STEP = 6;          // 스테이지마다 늘어나는 이빨 개수
+  const TOTAL_STAGES = 3;
+  const STAGE_TOOTH_COUNTS = Array.from(
+    { length: TOTAL_STAGES },
+    (_, i) => BASE_TOOTH_COUNT + i * TEETH_STEP
+  ); // [10, 16, 22]
+
+  const topGum = document.getElementById('topGum');
+  const bottomGum = document.getElementById('bottomGum');
+  const scoreEl = document.getElementById('score');
+  const bestEl = document.getElementById('best');
+  const stageEl = document.getElementById('stage');
+  const statusLine = document.getElementById('statusLine');
+  const croc = document.getElementById('croc');
+  const crocWrap = document.getElementById('crocWrap');
+  const clak = document.getElementById('clak');
+  const restartBtn = document.getElementById('restartBtn');
+  const stageButtons = Array.from(document.querySelectorAll('.stage-btn'));
+
+  let score = 0;
+  let best = 0;
+  let stageIndex = 0; // 0-based: 0,1,2
+  let toothCount = STAGE_TOOTH_COUNTS[0];
+  let trapIndex = -1;
+  let pressedCount = 0;
+  let gameOver = false;
+  let teeth = [];
+
+  function buildTeeth() {
+    topGum.innerHTML = '';
+    bottomGum.innerHTML = '';
+    teeth = [];
+    for (let i = 0; i < toothCount; i++) {
+      const btn = document.createElement('button');
+      btn.className = 'tooth-btn';
+      btn.dataset.index = i;
+      btn.addEventListener('click', () => handlePress(i));
+      teeth.push(btn);
+      if (i % 2 === 0) {
+        topGum.appendChild(btn);
+      } else {
+        bottomGum.appendChild(btn);
+      }
+    }
+  }
+
+  function updateStageDisplay() {
+    stageEl.textContent = (stageIndex + 1) + ' / ' + TOTAL_STAGES;
+    stageButtons.forEach(btn => {
+      btn.classList.toggle('active', Number(btn.dataset.stage) === stageIndex);
+    });
+  }
+
+  function goToStage(idx) {
+    stageIndex = idx;
+    score = 0;
+    updateScore();
+    newRound();
+  }
+
+  function newRound() {
+    gameOver = false;
+    pressedCount = 0;
+    toothCount = STAGE_TOOTH_COUNTS[stageIndex];
+    trapIndex = Math.floor(Math.random() * toothCount);
+    croc.classList.remove('biting');
+    crocWrap.classList.remove('shake');
+    clak.classList.remove('show');
+    buildTeeth();
+    updateStageDisplay();
+    statusLine.classList.remove('danger-text');
+    statusLine.textContent = '스테이지 ' + (stageIndex + 1) + ' · 이빨 ' + toothCount + '개! 눌러보세요';
+  }
+
+  function startGame() {
+    stageIndex = 0;
+    newRound();
+  }
+
+  function updateScore() {
+    scoreEl.textContent = score;
+    if (score > best) {
+      best = score;
+      bestEl.textContent = best;
+    }
+  }
+
+  function handlePress(index) {
+    if (gameOver) return;
+    const btn = teeth[index];
+    if (btn.disabled) return;
+
+    if (index === trapIndex) {
+      triggerBite(btn);
+      return;
+    }
+
+    btn.classList.add('pressed');
+    btn.disabled = true;
+    score += 1;
+    pressedCount += 1;
+    updateScore();
+
+    const remaining = toothCount - pressedCount - 1; // trap 이빨 제외
+    if (remaining <= 0) {
+      handleStageClear();
+    } else {
+      statusLine.textContent = '안전해요! 이빨 ' + remaining + '개 남음';
+    }
+  }
+
+  function handleStageClear() {
+    score += 5;
+    updateScore();
+
+    if (stageIndex < TOTAL_STAGES - 1) {
+      statusLine.classList.remove('danger-text');
+      statusLine.textContent = '스테이지 ' + (stageIndex + 1) + ' 클리어! +5 보너스 · 다음 스테이지로';
+      stageIndex += 1;
+      setTimeout(newRound, 1000);
+    } else {
+      gameOver = true;
+      teeth.forEach(t => t.disabled = true);
+      statusLine.classList.remove('danger-text');
+      statusLine.textContent = '전 스테이지 클리어! 최종 점수 ' + score + ' · 축하해요!';
+    }
+  }
+
+  function triggerBite(btn) {
+    gameOver = true;
+    btn.classList.add('trap-hit');
+    teeth.forEach(t => t.disabled = true);
+    croc.classList.add('biting');
+    crocWrap.classList.add('shake');
+    clak.classList.add('show');
+    statusLine.classList.add('danger-text');
+    statusLine.textContent = '물렸다! 게임 오버 · 스테이지 ' + (stageIndex + 1) + ' · 최종 점수 ' + score;
+  }
+
+  stageButtons.forEach(btn => {
+    btn.addEventListener('click', () => goToStage(Number(btn.dataset.stage)));
+  });
+
+  restartBtn.addEventListener('click', () => {
+    score = 0;
+    updateScore();
+    startGame();
+  });
+
+  startGame();
+  updateScore();
+})();
+</script>
+
+</body>
+</html>
