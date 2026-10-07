@@ -5,33 +5,38 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>미니게임 아케이드</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700&display=swap');
 
-  :root{
-    --bg:#181A2E;
-    --bg-2:#20233D;
-    --gold:#FFC93C;
-    --coral:#FF5D73;
-    --teal:#00C2A8;
-    --cream:#F4EFEA;
-    --cream-dim:#B9B5C4;
-    --line: rgba(244,239,234,0.14);
+  :root {
+    --bg: #181A2E;
+    --bg-2: #20233D;
+    --card-bg: #262a4a;
+    --card-hover: #31365e;
+    --gold: #FFC93C;
+    --coral: #FF5D73;
+    --teal: #00C2A8;
+    --cream: #F4EFEA;
+    --cream-dim: #B9B5C4;
+    --line: rgba(244, 239, 234, 0.14);
   }
-  *{box-sizing:border-box;}
-  html,body{margin:0;padding:0;}
-  body{
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  
+  body {
     background:
       radial-gradient(ellipse at 20% 0%, rgba(255,201,60,0.08), transparent 55%),
       radial-gradient(ellipse at 85% 15%, rgba(255,93,115,0.08), transparent 50%),
       var(--bg);
-    color:var(--cream);
-    font-family:'Inter', sans-serif;
-    min-height:100vh;
+    color: var(--cream);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    min-height: 100vh;
   }
-  .wrap{
-    max-width:960px;
-    margin:0 auto;
-    padding:64px 24px 80px;
+
+  .wrap {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 64px 24px 80px;
   }
 
   /* 홈으로 가기 버튼 스타일 */
@@ -50,52 +55,121 @@
     margin-bottom: 32px;
     transition: all 0.18s ease;
   }
+
   .home-btn:hover {
     color: var(--cream);
     border-color: var(--cream-dim);
     transform: translateY(-2px);
   }
+
   .home-btn svg {
     width: 16px;
     height: 16px;
   }
 
-  header{
-    text-align:center;
-    margin-bottom:56px;
+  header {
+    text-align: center;
+    margin-bottom: 48px;
   }
-  .eyebrow{
-    font-size:13px;
-    letter-spacing:0.04em;
-    color:var(--gold);
-    margin:0 0 12px;
-    font-weight:500;
+
+  .eyebrow {
+    font-size: 13px;
+    letter-spacing: 0.08em;
+    color: var(--gold);
+    margin: 0 0 12px;
+    font-weight: 600;
   }
-  h1{
-    font-family:'Anton', sans-serif;
-    font-weight:400;
-    font-size:clamp(40px, 7vw, 72px);
-    line-height:0.95;
-    margin:0 0 16px;
-    letter-spacing:0.01em;
-    color:var(--cream);
-    text-shadow: 0 4px 20px rgba(0,0,0,0.3); /* 구문 보정 완료 */
+
+  h1 {
+    font-family: 'Anton', sans-serif;
+    font-weight: 400;
+    font-size: clamp(40px, 7vw, 64px);
+    line-height: 1;
+    margin: 0 0 16px;
+    letter-spacing: 0.02em;
+    color: var(--cream);
+    text-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  }
+
+  .subtitle {
+    color: var(--cream-dim);
+    font-size: 15px;
+    margin: 0;
+  }
+
+  /* 게임 그리드 레이아웃 */
+  .game-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+  }
+
+  /* 게임 카드리스트 스타일 */
+  .game-card {
+    background: var(--card-bg);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 24px;
+    text-decoration: none;
+    color: var(--cream);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .game-card:hover {
+    background: var(--card-hover);
+    border-color: rgba(255, 201, 60, 0.4);
+    transform: translateY(-4px);
+    box-shadow: 0 12px 24px rgba(0,0,0,0.3);
+  }
+
+  .game-card-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+
+  .game-icon {
+    font-size: 28px;
+    line-height: 1;
+  }
+
+  .game-title {
+    font-size: 18px;
+    font-weight: 600;
+    margin: 0;
+    color: var(--cream);
+  }
+
+  .game-desc {
+    font-size: 13px;
+    color: var(--cream-dim);
+    line-height: 1.5;
+    margin: 0 0 20px;
+  }
+
+  .play-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--gold);
+    align-self: flex-start;
+  }
+
+  .game-card:hover .play-tag {
+    color: var(--coral);
   }
 </style>
 </head>
 <body>
-  <div class="wrap">
-    <a href="#" class="home-btn">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
-      </svg>
-      홈으로 가기
-    </a>
 
-    <header>
-      <p class="eyebrow">MINI GAME ARCADE</p>
-      <h1>ARCADE CENTER</h1>
-    </header>
-  </div>
-</body>
-</html>
+  <div class="wrap">
+    <!-- 홈으로 돌아가기 버튼 (target="_blank" 없음) -->
+    <a href="
